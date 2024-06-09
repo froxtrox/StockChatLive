@@ -1,0 +1,62 @@
+﻿@page
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Stock Prices</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        #messagesList {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc; 
+            padding:5px;
+        }
+
+        .chat-box { 
+            margin:10px;
+            overflow-y: auto; 
+            background-color: #f8f9fa; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>Real-time Stock Prices</h1>
+                <canvas id="stockChart" width="400" height="200"></canvas>
+            </div>
+            <div class="col-md-4">
+                <h1>Live Chat</h1>
+                <div class="container-fluid bg-light p-3 rounded">
+                    <div class="mb-3">
+                        <label for="userInput" class="form-label">User</label>
+                        <input type="text" id="userInput" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageInput" class="form-label">Message</label>
+                        <input type="text" id="messageInput" class="form-control" />
+                    </div>
+                    <div class="text-end mb-3">
+                        <input type="button" id="sendButton" value="Send" class="btn btn-primary" />
+                    </div>
+                    <div class="mb-3">
+                        <hr />
+                    </div>
+                    <div class="chat-box mb-3">
+                        <ul id="messagesList" class="list-unstyled"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script src="~/js/stock.js"></script>
+</body>
+</html>
+
