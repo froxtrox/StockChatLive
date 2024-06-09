@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace LilChatApp.Pages
+namespace StockChatLive.Pages
 {
     public class IndexModel : PageModel
     {

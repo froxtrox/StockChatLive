@@ -1,4 +1,4 @@
-﻿using LilChatApp.Services;
+﻿using StockChatLive.Services;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;

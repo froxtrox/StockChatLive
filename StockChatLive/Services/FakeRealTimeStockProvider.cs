@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace LilChatApp.Services
+namespace StockChatLive.Services
 {
     public class FakeRealTimeStockProvider : IRealTimeStockProvider
     {

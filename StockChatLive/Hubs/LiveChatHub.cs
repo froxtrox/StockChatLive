@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace LilChatApp.Hubs
+namespace StockChatLive.Hubs
 {
     public class LiveChatHub : Hub
     {

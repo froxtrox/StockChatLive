@@ -1,4 +1,4 @@
-﻿namespace LilChatApp.Services
+﻿namespace StockChatLive.Services
 {
     public interface IRealTimeStockProvider
     {

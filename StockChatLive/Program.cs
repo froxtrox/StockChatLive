@@ -1,5 +1,5 @@
-using LilChatApp.Hubs;
-using LilChatApp.Services;
+using StockChatLive.Hubs;
+using StockChatLive.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
