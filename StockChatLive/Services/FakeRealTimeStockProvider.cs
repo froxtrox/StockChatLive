@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using StockChatLive.Hubs;
 
 namespace StockChatLive.Services
 {

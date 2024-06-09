@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace StockChatLive.Services
+namespace StockChatLive.Hubs
 {
     public class StockListingHub : Hub
     {
