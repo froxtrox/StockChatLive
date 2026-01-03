@@ -23,14 +23,13 @@ namespace StockChatLive.Services
 
         public void Stop()
         {
-            DisposeTimer();
             _timer?.Change(Timeout.Infinite, 0);
+            DisposeTimer();
             _logger.LogInformation("RealTimeStockProvider stopped.");
         }
 
         private void DisposeTimer()
         {
-            _timer?.Change(Timeout.Infinite, 0);
             _timer?.Dispose();
             _timer = null;
         }
