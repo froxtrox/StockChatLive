@@ -37,6 +37,7 @@ const stockChart = new Chart(ctx, {
 
 const stockconnection = new signalR.HubConnectionBuilder()
     .withUrl("/stocklisting")
+    .withAutomaticReconnect()
     .build();
 
 stockconnection.on("PostStocks", (name, price) => {
@@ -46,4 +47,31 @@ stockconnection.on("PostStocks", (name, price) => {
     stockChart.update();
 });
 
-stockconnection.start().catch(err => console.error(err.toString()));
+stockconnection.onreconnecting((error) => {
+    console.log("Stock connection lost. Reconnecting...", error);
+    updateStockConnectionStatus("Reconnecting...", "warning");
+});
+
+stockconnection.onreconnected((connectionId) => {
+    console.log("Stock connection reestablished. Connected with connectionId: " + connectionId);
+    updateStockConnectionStatus("Connected", "success");
+});
+
+stockconnection.onclose((error) => {
+    console.log("Stock connection closed.", error);
+    updateStockConnectionStatus("Disconnected", "danger");
+});
+
+stockconnection.start()
+    .then(() => {
+        updateStockConnectionStatus("Connected", "success");
+    })
+    .catch(err => console.error(err.toString()));
+
+function updateStockConnectionStatus(message, status) {
+    const statusElement = document.getElementById("stockConnectionStatus");
+    if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = `alert alert-${status} p-2 text-center`;
+    }
+}
