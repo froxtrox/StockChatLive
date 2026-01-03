@@ -66,7 +66,10 @@ function scrollToBottom() {
 function updateChatConnectionStatus(message, status) {
     const statusElement = document.getElementById("chatConnectionStatus");
     if (statusElement) {
+        // Validate status to prevent CSS injection
+        const validStatuses = ["info", "success", "warning", "danger"];
+        const safeStatus = validStatuses.includes(status) ? status : "info";
         statusElement.textContent = message;
-        statusElement.className = `alert alert-${status} p-2 text-center`;
+        statusElement.className = `alert alert-${safeStatus} p-2 text-center`;
     }
 }
