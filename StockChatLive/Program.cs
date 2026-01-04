@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<IRealTimeStockProvider,FakeRealTimeStockProvider>();
+builder.Services.AddSingleton<IRealTimeStockProvider,SimulatedStockProvider>();
 builder.Services.AddHostedService<StockPriceHostedService>();
 var app = builder.Build();
 

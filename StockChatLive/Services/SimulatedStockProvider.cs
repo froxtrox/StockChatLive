@@ -3,13 +3,13 @@ using StockChatLive.Hubs;
 
 namespace StockChatLive.Services
 {
-    public class FakeRealTimeStockProvider : IRealTimeStockProvider
+    public class SimulatedStockProvider : IRealTimeStockProvider
     {
         private readonly IHubContext<StockListingHub> _stockListingHub;
-        private readonly ILogger<FakeRealTimeStockProvider> _logger;
+        private readonly ILogger<SimulatedStockProvider> _logger;
         private Timer? _timer;
 
-        public FakeRealTimeStockProvider(IHubContext<StockListingHub> stockHub, ILogger<FakeRealTimeStockProvider> logger)
+        public SimulatedStockProvider(IHubContext<StockListingHub> stockHub, ILogger<SimulatedStockProvider> logger)
         {
             _stockListingHub = stockHub;
             _logger = logger;
@@ -37,7 +37,7 @@ namespace StockChatLive.Services
         private async Task PostStocks()
         {
             decimal price = Random.Shared.Next(101, 113);
-            _logger.LogInformation($"Posting stock price: {price}");
+            _logger.LogDebug($"Posting stock price: {price}");
             await _stockListingHub.Clients.All.SendAsync("PostStocks", "PostStocks", price);
         }
     }
