@@ -36,7 +36,7 @@ namespace StockChatLive.Services
 
         private async Task PostStocks()
         {
-            decimal price = new Random().Next(101, 113);
+            decimal price = Random.Shared.Next(101, 113);
             _logger.LogInformation($"Posting stock price: {price}");
             await _stockListingHub.Clients.All.SendAsync("PostStocks", "PostStocks", price);
         }
