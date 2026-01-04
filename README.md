@@ -40,3 +40,10 @@ Client-side scripts can be found in the wwwroot/js directory. SignalR functional
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request with your improvements.
+
+## SignalR Message Size Limits
+
+SignalR message buffers are limited to 64 KB to protect against large message
+attacks and excessive memory usage.
+
+These limits can be adjusted in `Program.cs` if needed.
