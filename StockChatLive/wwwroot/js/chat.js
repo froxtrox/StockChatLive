@@ -53,8 +53,27 @@ connection.on("ReceiveMessage", function (user, message) {
     scrollToBottom();
 });
 
+connection.onreconnecting((error) => {
+    console.log("Connection lost. Reconnecting...", error);
+    document.getElementById("sendButton").disabled = true;
+    updateChatConnectionStatus("Reconnecting...", "warning");
+});
+
+connection.onreconnected((connectionId) => {
+    console.log("Connection reestablished. Connected with connectionId: " + connectionId);
+    document.getElementById("sendButton").disabled = false;
+    updateChatConnectionStatus("Connected", "success");
+});
+
+connection.onclose((error) => {
+    console.log("Connection closed.", error);
+    document.getElementById("sendButton").disabled = true;
+    updateChatConnectionStatus("Disconnected", "danger");
+});
+
 connection.start().then(function () {
     document.getElementById("sendButton").disabled = false;
+    updateChatConnectionStatus("Connected", "success");
 }).catch(function (err) {
     if (err.message && err.message.includes("401")) {
         localStorage.removeItem("jwt_token");
@@ -110,5 +129,16 @@ function scrollToBottom() {
     var isScrolledToBottom = messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
     if (isScrolledToBottom) {
         messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight;
+    }
+}
+
+function updateChatConnectionStatus(message, status) {
+    const statusElement = document.getElementById("chatConnectionStatus");
+    if (statusElement) {
+        // Validate status to prevent CSS injection
+        const validStatuses = ["info", "success", "warning", "danger"];
+        const safeStatus = validStatuses.includes(status) ? status : "info";
+        statusElement.textContent = message;
+        statusElement.className = `alert alert-${safeStatus} p-2 text-center`;
     }
 }

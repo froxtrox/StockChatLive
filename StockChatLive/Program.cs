@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<IRealTimeStockProvider,FakeRealTimeStockProvider>();
+builder.Services.AddSingleton<IRealTimeStockProvider,SimulatedStockProvider>();
 builder.Services.AddHostedService<StockPriceHostedService>();
 
 builder.Services.AddAuthentication(options =>
