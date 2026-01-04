@@ -5,10 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+const int MaxBufferSize = 64 * 1024; // 64 KB
+
 builder.Services.AddSignalR(options =>
 {
     // Maximum size of incoming messages the server will buffer
-    options.MaximumReceiveMessageSize = 64 * 1024; // 64 KB
+    options.MaximumReceiveMessageSize = MaxBufferSize;
 });
 
 builder.Services.AddSingleton<IRealTimeStockProvider,FakeRealTimeStockProvider>();
@@ -35,14 +37,14 @@ app.MapRazorPages();
 
 app.MapHub<StockListingHub>("/stocklisting", options =>
 {
-    options.ApplicationMaxBufferSize = 64 * 1024; // 64 KB
-    options.TransportMaxBufferSize = 64 * 1024;   // 64 KB
+    options.ApplicationMaxBufferSize = MaxBufferSize; // 64 KB
+    options.TransportMaxBufferSize = MaxBufferSize;   // 64 KB
 });
 
 app.MapHub<LiveChatHub>("/livechat", options =>
 {
-    options.ApplicationMaxBufferSize = 64 * 1024; // 64 KB
-    options.TransportMaxBufferSize = 64 * 1024;   // 64 KB
+    options.ApplicationMaxBufferSize = MaxBufferSize; // 64 KB
+    options.TransportMaxBufferSize = MaxBufferSize;   // 64 KB
 });
 app.Run();
  
