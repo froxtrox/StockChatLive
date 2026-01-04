@@ -47,6 +47,7 @@ const stockconnection = new signalR.HubConnectionBuilder()
     .withUrl("/stocklisting", {
         accessTokenFactory: function() { return getToken(); }
     })
+    .withAutomaticReconnect()
     .build();
 
 stockconnection.on("PostStocks", (name, price) => {
@@ -56,9 +57,25 @@ stockconnection.on("PostStocks", (name, price) => {
     stockChart.update();
 });
 
+function updateStockConnectionStatus(message, status) {
+    stockStatus.textContent = message;
+    stockStatus.className = "alert alert-" + status;
+    if (!stockStatus.parentNode) {
+        document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
+    }
+}
+
+stockconnection.onreconnecting((error) => {
+    updateStockConnectionStatus("Reconnecting to stock feed...", "warning");
+});
+
+stockconnection.onreconnected((connectionId) => {
+    updateStockConnectionStatus("Reconnected to stock feed", "success");
+    setTimeout(function() { stockStatus.remove(); }, 3000);
+});
+
 stockconnection.start().then(function() {
-    stockStatus.className = "alert alert-success";
-    stockStatus.textContent = "Connected to stock feed";
+    updateStockConnectionStatus("Connected to stock feed", "success");
     setTimeout(function() { stockStatus.remove(); }, 3000);
 }).catch(function(err) {
     if (err.message && err.message.includes("401")) {
@@ -66,13 +83,10 @@ stockconnection.start().then(function() {
         window.location.href = "/Login";
         return;
     }
-    stockStatus.className = "alert alert-danger";
-    stockStatus.textContent = "Failed to connect to stock feed";
+    updateStockConnectionStatus("Failed to connect to stock feed", "danger");
     console.error(err.toString());
 });
 
 stockconnection.onclose(function(error) {
-    stockStatus.className = "alert alert-warning";
-    stockStatus.textContent = "Stock feed disconnected";
-    document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
+    updateStockConnectionStatus("Stock feed disconnected", "warning");
 });

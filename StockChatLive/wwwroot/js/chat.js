@@ -31,6 +31,7 @@ var connection = new signalR.HubConnectionBuilder()
     .withUrl("/livechat", {
         accessTokenFactory: function() { return getToken(); }
     })
+    .withAutomaticReconnect()
     .build();
 
 document.getElementById("sendButton").disabled = true;

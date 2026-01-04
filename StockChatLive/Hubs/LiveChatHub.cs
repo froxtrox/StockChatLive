@@ -46,16 +46,16 @@ namespace StockChatLive.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            _logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
+            _logger.LogInformation("Chat client connected: {ConnectionId}", Context.ConnectionId);
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (exception != null)
-                _logger.LogWarning(exception, "Client disconnected with error: {ConnectionId}", Context.ConnectionId);
+                _logger.LogWarning(exception, "Chat client disconnected with error: {ConnectionId}", Context.ConnectionId);
             else
-                _logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
+                _logger.LogInformation("Chat client disconnected: {ConnectionId}", Context.ConnectionId);
             
             await base.OnDisconnectedAsync(exception);
         }
