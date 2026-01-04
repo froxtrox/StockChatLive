@@ -1,8 +1,18 @@
 ﻿"use strict";
 
+function getToken() {
+    return localStorage.getItem("jwt_token");
+}
+
+var stockStatus = document.createElement("div");
+stockStatus.id = "stockStatus";
+stockStatus.className = "alert alert-info";
+stockStatus.textContent = "Connecting to stock feed...";
+document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
+
 const ctx = document.getElementById('stockChart').getContext('2d');
 const stockData = {
-    labels: [], // Time labels
+    labels: [],
     datasets: [{
         label: 'Stock Price',
         data: [],
@@ -23,9 +33,7 @@ const stockChart = new Chart(ctx, {
                     unit: 'second'
                 },
                 adapters: {
-                    date: {
-                        // Using date-fns adapter
-                    }
+                    date: {}
                 }
             },
             y: {
@@ -36,7 +44,9 @@ const stockChart = new Chart(ctx, {
 });
 
 const stockconnection = new signalR.HubConnectionBuilder()
-    .withUrl("/stocklisting")
+    .withUrl("/stocklisting", {
+        accessTokenFactory: function() { return getToken(); }
+    })
     .build();
 
 stockconnection.on("PostStocks", (name, price) => {
@@ -46,4 +56,23 @@ stockconnection.on("PostStocks", (name, price) => {
     stockChart.update();
 });
 
-stockconnection.start().catch(err => console.error(err.toString()));
+stockconnection.start().then(function() {
+    stockStatus.className = "alert alert-success";
+    stockStatus.textContent = "Connected to stock feed";
+    setTimeout(function() { stockStatus.remove(); }, 3000);
+}).catch(function(err) {
+    if (err.message && err.message.includes("401")) {
+        localStorage.removeItem("jwt_token");
+        window.location.href = "/Login";
+        return;
+    }
+    stockStatus.className = "alert alert-danger";
+    stockStatus.textContent = "Failed to connect to stock feed";
+    console.error(err.toString());
+});
+
+stockconnection.onclose(function(error) {
+    stockStatus.className = "alert alert-warning";
+    stockStatus.textContent = "Stock feed disconnected";
+    document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
+});
