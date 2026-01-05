@@ -34,9 +34,11 @@ bld/
 [Ll]ogs/
 
 
-# Ignore appsettings.json files
+# Ignore appsettings.json files (but allow .template.json files)
 appsettings.json
-appsettings.*.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
