@@ -9,6 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+
+const int MaxBufferSize = 64 * 1024; // 64 KB
+
+builder.Services.AddSignalR(options =>
+{
+    // Maximum size of incoming messages the server will buffer
+    options.MaximumReceiveMessageSize = MaxBufferSize;
+});
 builder.Services.AddSingleton<IRealTimeStockProvider,SimulatedStockProvider>();
 builder.Services.AddHostedService<StockPriceHostedService>();
 
@@ -65,8 +73,18 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 
-app.MapHub<StockListingHub>("/stocklisting");
-app.MapHub<LiveChatHub>("/livechat");
+
+app.MapHub<StockListingHub>("/stocklisting", options =>
+{
+    options.ApplicationMaxBufferSize = MaxBufferSize; 
+    options.TransportMaxBufferSize = MaxBufferSize;   
+});
+
+app.MapHub<LiveChatHub>("/livechat", options =>
+{
+    options.ApplicationMaxBufferSize = MaxBufferSize;  
+    options.TransportMaxBufferSize = MaxBufferSize;  
+});
 app.Run();
 
  
