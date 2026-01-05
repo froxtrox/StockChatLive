@@ -53,25 +53,6 @@ This project uses a template-based configuration pattern. Configuration files fo
 - `appsettings.Development.template.json` - **Committed to git** - Development environment defaults
 - `appsettings.Development.json` - **Gitignored** - Your local development settings
 
-### Available Configuration Options
-
-The `appsettings.json` file supports the following configuration:
-
-- **Logging**: Configure log levels for different namespaces
-- **Kestrel Endpoints**: Customize HTTP/HTTPS ports
-- **StockSimulation**: Configure stock price update intervals and price ranges
-
-Example:
-```json
-{
-  "StockSimulation": {
-    "UpdateIntervalSeconds": 1,
-    "MinPrice": 101,
-    "MaxPrice": 113
-  }
-}
-```
-
 Your local changes to `appsettings.json` and `appsettings.Development.json` will never be tracked by git, allowing you to customize settings without affecting version control.
 
 ## Contributing
