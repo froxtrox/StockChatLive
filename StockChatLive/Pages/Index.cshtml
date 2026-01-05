@@ -30,10 +30,11 @@
             <div class="col-md-4">
                 <h1>Live Chat</h1>
                 <div id="chatConnectionStatus" class="alert alert-info p-2 text-center mb-3">Connecting...</div>
+                <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
                 <div class="container-fluid bg-light p-3 rounded">
-                    <div class="mb-3">
-                        <label for="userInput" class="form-label">User</label>
-                        <input type="text" id="userInput" class="form-control" />
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <span>Logged in as: <strong id="currentUser"></strong></span>
+                        <button id="logoutBtn" class="btn btn-sm btn-outline-secondary">Logout</button>
                     </div>
                     <div class="mb-3">
                         <label for="messageInput" class="form-label">Message</label>
