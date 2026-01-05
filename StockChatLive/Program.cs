@@ -11,11 +11,15 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 
 const int MaxBufferSize = 64 * 1024; // 64 KB
+const int MaxParallelInvocations = 1;
 
 builder.Services.AddSignalR(options =>
 {
     // Maximum size of incoming messages the server will buffer
     options.MaximumReceiveMessageSize = MaxBufferSize;
+    options.MaximumParallelInvocationsPerClient = MaxParallelInvocations;
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddSingleton<IRealTimeStockProvider,SimulatedStockProvider>();
 builder.Services.AddHostedService<StockPriceHostedService>();
