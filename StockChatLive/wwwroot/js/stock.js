@@ -4,11 +4,7 @@ function getToken() {
     return localStorage.getItem("jwt_token");
 }
 
-var stockStatus = document.createElement("div");
-stockStatus.id = "stockStatus";
-stockStatus.className = "alert alert-info";
-stockStatus.textContent = "Connecting to stock feed...";
-document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
+var stockStatus = document.getElementById("stockConnectionStatus");
 
 const ctx = document.getElementById('stockChart').getContext('2d');
 const stockData = {
@@ -58,11 +54,10 @@ stockconnection.on("PostStocks", (name, price) => {
 });
 
 function updateStockConnectionStatus(message, status) {
+    const validStatuses = ["info", "success", "warning", "danger"];
+    const safeStatus = validStatuses.includes(status) ? status : "info";
     stockStatus.textContent = message;
-    stockStatus.className = "alert alert-" + status;
-    if (!stockStatus.parentNode) {
-        document.querySelector(".col-md-8").insertBefore(stockStatus, document.getElementById("stockChart"));
-    }
+    stockStatus.className = `alert alert-${safeStatus} p-2 text-center mb-3`;
 }
 
 stockconnection.onreconnecting((error) => {
@@ -70,13 +65,11 @@ stockconnection.onreconnecting((error) => {
 });
 
 stockconnection.onreconnected((connectionId) => {
-    updateStockConnectionStatus("Reconnected to stock feed", "success");
-    setTimeout(function() { stockStatus.remove(); }, 3000);
+    updateStockConnectionStatus("Connected to stock feed", "success");
 });
 
 stockconnection.start().then(function() {
     updateStockConnectionStatus("Connected to stock feed", "success");
-    setTimeout(function() { stockStatus.remove(); }, 3000);
 }).catch(function(err) {
     if (err.message && err.message.includes("401")) {
         localStorage.removeItem("jwt_token");
