@@ -7,7 +7,9 @@ namespace StockChatLive.Services
     {
         private readonly IHubContext<StockListingHub> _stockListingHub;
         private readonly ILogger<SimulatedStockProvider> _logger;
-        private Timer? _timer;
+        private PeriodicTimer? _timer;
+        private Task? _timerTask;
+        private CancellationTokenSource? _cts;
 
         public SimulatedStockProvider(IHubContext<StockListingHub> stockHub, ILogger<SimulatedStockProvider> logger)
         {
@@ -17,23 +19,56 @@ namespace StockChatLive.Services
 
         public Task StartAsync(CancellationToken cancellationToken = default)
         {
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+            _timerTask = RunTimerAsync(_cts.Token);
             _logger.LogInformation("RealTimeStockProvider started.");
-            _timer = new Timer(async _ => await PostStocks(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken = default)
+        public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            _timer?.Change(Timeout.Infinite, 0);
-            DisposeTimer();
-            _logger.LogInformation("RealTimeStockProvider stopped.");
-            return Task.CompletedTask;
-        }
-
-        private void DisposeTimer()
-        {
+            _cts?.Cancel();
             _timer?.Dispose();
+
+            if (_timerTask != null)
+            {
+                try
+                {
+                    await _timerTask.ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogInformation("OperationCanceledException is caught.");
+                }
+                _timerTask = null;
+            }
+
+            _cts?.Dispose();
+            _cts = null;
             _timer = null;
+
+            _logger.LogInformation("RealTimeStockProvider stopped.");
+        }
+
+        private async Task RunTimerAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (_timer != null && await _timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    await PostStocks();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                 _logger.LogInformation("OperationCanceledException is caught.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in stock timer loop");
+                throw;
+            }
         }
 
         private async Task PostStocks()
