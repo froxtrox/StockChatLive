@@ -9,16 +9,14 @@
             _realTimeStockProvider = realTimeStockProvider;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            _realTimeStockProvider.Start();
-            return Task.CompletedTask;
+            await _realTimeStockProvider.StartAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _realTimeStockProvider.Stop();
-            return Task.CompletedTask;
+            await _realTimeStockProvider.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

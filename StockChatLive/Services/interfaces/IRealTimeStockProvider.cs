@@ -2,7 +2,7 @@
 {
     public interface IRealTimeStockProvider
     {
-        void Start();
-        void Stop();
+        Task StartAsync(CancellationToken cancellationToken = default);
+        Task StopAsync(CancellationToken cancellationToken = default);
     }
 }

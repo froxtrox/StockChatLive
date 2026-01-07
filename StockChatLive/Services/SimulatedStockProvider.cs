@@ -15,17 +15,19 @@ namespace StockChatLive.Services
             _logger = logger;
         }
 
-        public void Start()
+        public Task StartAsync(CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("RealTimeStockProvider started.");
             _timer = new Timer(async _ => await PostStocks(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            return Task.CompletedTask;
         }
 
-        public void Stop()
+        public Task StopAsync(CancellationToken cancellationToken = default)
         {
             _timer?.Change(Timeout.Infinite, 0);
             DisposeTimer();
             _logger.LogInformation("RealTimeStockProvider stopped.");
+            return Task.CompletedTask;
         }
 
         private void DisposeTimer()
