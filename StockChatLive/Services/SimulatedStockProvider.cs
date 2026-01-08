@@ -89,7 +89,7 @@ namespace StockChatLive.Services
             {
                 while (_timer != null && await _timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    await PostStocks();
+                    await PostStocksAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -103,11 +103,24 @@ namespace StockChatLive.Services
             }
         }
 
-        private async Task PostStocks()
+        private async Task PostStocksAsync(CancellationToken cancellationToken)
         {
-            decimal price = Random.Shared.Next(101, 113);
-            _logger.LogInformation($"Posting stock price: {price}");
-            await _stockListingHub.Clients.All.SendAsync("PostStocks", "PostStocks", price);
+            try
+            {
+                decimal price = Random.Shared.Next(101, 113);
+                _logger.LogInformation($"Posting stock price: {price}");
+                await _stockListingHub.Clients.All.SendAsync("PostStocks", "PostStocks", price, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected during shutdown
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error posting stock price");
+                // Don't rethrow - continue processing
+            }
         }
 
         public async ValueTask DisposeAsync()
