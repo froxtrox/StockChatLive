@@ -3,13 +3,15 @@ using StockChatLive.Hubs;
 
 namespace StockChatLive.Services
 {
-    public class SimulatedStockProvider : IRealTimeStockProvider
+    public class SimulatedStockProvider : IRealTimeStockProvider, IAsyncDisposable
     {
         private readonly IHubContext<StockListingHub> _stockListingHub;
         private readonly ILogger<SimulatedStockProvider> _logger;
         private PeriodicTimer? _timer;
         private Task? _timerTask;
         private CancellationTokenSource? _cts;
+        private readonly SemaphoreSlim _stateLock = new SemaphoreSlim(1, 1);
+        private bool _disposed;
 
         public SimulatedStockProvider(IHubContext<StockListingHub> stockHub, ILogger<SimulatedStockProvider> logger)
         {
@@ -17,38 +19,68 @@ namespace StockChatLive.Services
             _logger = logger;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken = default)
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-            _timerTask = RunTimerAsync(_cts.Token);
-            _logger.LogInformation("RealTimeStockProvider started.");
-            return Task.CompletedTask;
+            await _stateLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(SimulatedStockProvider));
+
+                if (_cts != null)
+                {
+                    _logger.LogWarning("RealTimeStockProvider already started.");
+                    return;
+                }
+
+                _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+                _timerTask = RunTimerAsync(_cts.Token);
+                _logger.LogInformation("RealTimeStockProvider started.");
+            }
+            finally
+            {
+                _stateLock.Release();
+            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            _cts?.Cancel();
-            _timer?.Dispose();
-
-            if (_timerTask != null)
+            await _stateLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                try
+                if (_cts == null)
                 {
-                    await _timerTask.ConfigureAwait(false);
+                    _logger.LogDebug("RealTimeStockProvider already stopped or not started.");
+                    return;
                 }
-                catch (OperationCanceledException)
+
+                _cts.Cancel();
+                _timer?.Dispose();
+
+                if (_timerTask != null)
                 {
-                    _logger.LogInformation("OperationCanceledException is caught.");
+                    try
+                    {
+                        await _timerTask.ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _logger.LogInformation("OperationCanceledException is caught.");
+                    }
+                    _timerTask = null;
                 }
-                _timerTask = null;
+
+                _cts.Dispose();
+                _cts = null;
+                _timer = null;
+
+                _logger.LogInformation("RealTimeStockProvider stopped.");
             }
-
-            _cts?.Dispose();
-            _cts = null;
-            _timer = null;
-
-            _logger.LogInformation("RealTimeStockProvider stopped.");
+            finally
+            {
+                _stateLock.Release();
+            }
         }
 
         private async Task RunTimerAsync(CancellationToken cancellationToken)
@@ -74,8 +106,18 @@ namespace StockChatLive.Services
         private async Task PostStocks()
         {
             decimal price = Random.Shared.Next(101, 113);
-            _logger.LogDebug($"Posting stock price: {price}");
+            _logger.LogInformation($"Posting stock price: {price}");
             await _stockListingHub.Clients.All.SendAsync("PostStocks", "PostStocks", price);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_disposed)
+                return;
+
+            await StopAsync().ConfigureAwait(false);
+            _stateLock.Dispose();
+            _disposed = true;
         }
     }
 }
