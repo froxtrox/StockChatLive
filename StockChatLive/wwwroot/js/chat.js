@@ -19,9 +19,17 @@ if (!getToken()) {
     window.location.href = "/Login";
 }
 
-document.getElementById("currentUser").textContent = getUsernameFromToken();
+// Cache DOM elements
+var currentUserElement = document.getElementById("currentUser");
+var logoutBtn = document.getElementById("logoutBtn");
+var sendButton = document.getElementById("sendButton");
+var messageInput = document.getElementById("messageInput");
+var messagesList = document.getElementById("messagesList");
+var errorAlert = document.getElementById("errorAlert");
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+currentUserElement.textContent = getUsernameFromToken();
+
+logoutBtn.addEventListener("click", function() {
     localStorage.removeItem("jwt_token");
     localStorage.removeItem("jwt_expiration");
     window.location.href = "/Login";
@@ -34,10 +42,9 @@ var connection = new signalR.HubConnectionBuilder()
     .withAutomaticReconnect()
     .build();
 
-document.getElementById("sendButton").disabled = true;
+sendButton.disabled = true;
 
 function showError(message) {
-    var errorAlert = document.getElementById("errorAlert");
     errorAlert.textContent = message;
     errorAlert.classList.remove("d-none");
     setTimeout(function() {
@@ -47,7 +54,7 @@ function showError(message) {
 
 connection.on("ReceiveMessage", function (user, message) {
     var li = document.createElement("li");
-    document.getElementById("messagesList").appendChild(li);
+    messagesList.appendChild(li);
     var now = new Date();
     var timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     li.textContent = `[${timeString}] ${user} says: ${message}`;
@@ -56,69 +63,70 @@ connection.on("ReceiveMessage", function (user, message) {
 
 connection.onreconnecting((error) => {
     console.log("Connection lost. Reconnecting...", error);
-    document.getElementById("sendButton").disabled = true;
-    updateChatConnectionStatus("Reconnecting...", "warning");
+    sendButton.disabled = true;
+    updateChatConnectionStatus("Reconnecting to live chat...", "warning");
 });
 
 connection.onreconnected((connectionId) => {
     console.log("Connection reestablished. Connected with connectionId: " + connectionId);
-    document.getElementById("sendButton").disabled = false;
-    updateChatConnectionStatus("Connected", "success");
+    sendButton.disabled = false;
+    updateChatConnectionStatus("Connected to live chat", "success");
 });
 
 connection.onclose((error) => {
     console.log("Connection closed.", error);
-    document.getElementById("sendButton").disabled = true;
+    sendButton.disabled = true;
     updateChatConnectionStatus("Disconnected", "danger");
+    if (error) {
+        showError("Connection lost. Please refresh the page.");
+    }
 });
 
 connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
-    updateChatConnectionStatus("Connected", "success");
+    sendButton.disabled = false;
+    updateChatConnectionStatus("Connected to live chat", "success");
 }).catch(function (err) {
     if (err.message && err.message.includes("401")) {
         localStorage.removeItem("jwt_token");
         window.location.href = "/Login";
         return;
     }
-    showError("Failed to connect to chat. Please refresh the page.");
+    showError("Failed to connect to live chat. Please refresh the page.");
     console.error(err.toString());
 });
 
-connection.onclose(function (error) {
-    document.getElementById("sendButton").disabled = true;
-    if (error) {
-        showError("Connection lost. Please refresh the page.");
-    }
-});
-
 function sendMessage() {
-    var message = document.getElementById("messageInput").value.trim();
-    
+    var message = messageInput.value.trim();
+
     if (!message) {
         showError("Message cannot be empty.");
         return;
     }
-    
+
     if (message.length > 500) {
         showError("Message too long (max 500 characters).");
         return;
     }
-    
+
+    // Disable send button during message send
+    sendButton.disabled = true;
+
     connection.invoke("SendMessage", message).then(function() {
-        document.getElementById("messageInput").value = "";
+        messageInput.value = "";
+        sendButton.disabled = false;
     }).catch(function (err) {
         showError(err.message || "Failed to send message.");
         console.error(err.toString());
+        sendButton.disabled = false;
     });
 }
 
-document.getElementById("sendButton").addEventListener("click", function (event) {
+sendButton.addEventListener("click", function (event) {
     event.preventDefault();
     sendMessage();
 });
 
-document.getElementById("messageInput").addEventListener("keypress", function (event) {
+messageInput.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
         event.preventDefault();
         sendMessage();
@@ -126,7 +134,6 @@ document.getElementById("messageInput").addEventListener("keypress", function (e
 });
 
 function scrollToBottom() {
-    var messagesList = document.getElementById("messagesList");
     var isScrolledToBottom = messagesList.scrollHeight - messagesList.clientHeight <= messagesList.scrollTop + 1;
     if (isScrolledToBottom) {
         messagesList.scrollTop = messagesList.scrollHeight - messagesList.clientHeight;

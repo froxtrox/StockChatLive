@@ -81,5 +81,5 @@ stockconnection.start().then(function() {
 });
 
 stockconnection.onclose(function(error) {
-    updateStockConnectionStatus("Stock feed disconnected", "warning");
+    updateStockConnectionStatus("Stock feed disconnected", "danger");
 });
