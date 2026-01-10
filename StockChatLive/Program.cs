@@ -7,8 +7,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddControllers();
-builder.Services.AddSignalR();
+builder.Services.AddControllers(); 
 
 const int MaxBufferSize = 64 * 1024; // 64 KB
 const int MaxParallelInvocations = 1;
