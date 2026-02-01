@@ -88,6 +88,7 @@ app.MapHub<LiveChatHub>("/livechat", options =>
     options.ApplicationMaxBufferSize = MaxBufferSize;  
     options.TransportMaxBufferSize = MaxBufferSize;  
 });
+
 app.Run();
 
  

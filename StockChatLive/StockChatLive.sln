@@ -1,0 +1,11 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Deprecated nested solution placeholder
+#
+# This repository uses the root-level StockChatLive.sln as the canonical solution
+# for the StockChatLive project. This file is kept only to avoid confusion when
+# opening the StockChatLive folder directly.
+#
+# Please open the solution at:
+#   ../StockChatLive.sln
+#
+# No projects are defined in this file.
