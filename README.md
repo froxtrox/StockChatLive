@@ -13,9 +13,9 @@ StockChatLive is a real-time chat application for stock traders. It leverages AS
 
 ### Prerequisites
 
-- .NET 6.0 SDK
+- .NET 10.0 SDK
 - Node.js (for SignalR client-side library management)
-- Visual Studio 2019 or later, or VS Code
+- Visual Studio 2026 or later, or VS Code
 
 ### Setup
 
